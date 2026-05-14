@@ -1,0 +1,34 @@
+# DATA & FEATURES (CRITICAL)
+
+# Ignore all numpy arrays and raw data
+*.npy
+*.npz
+*.csv
+*.mat
+*.edf
+*.gdf
+/data/
+mne_data/
+/processed_global/
+/TrainingTesting-Data/
+
+# PYTHON ENVIRONMENTS
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# Python cache (compiled files)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# JUPYTER NOTEBOOKS
+.ipynb_checkpoints/
+
+# IDE & SYSTEM FILES
+.vscode/
+.idea/
+.DS_Store
