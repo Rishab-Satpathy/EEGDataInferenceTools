@@ -1,104 +1,68 @@
-# Acoustic-Derivative BCI: Decoding Motor Imagery via Audio Feature Extraction
+# Acoustic-Derivative BCI & The RADAR Architecture
 
 ## Overview
+This repository contains a continuously evolving Brain-Computer Interface (BCI) framework. It initially began as an exploration into decoding Left/Right Hand Motor Imagery by treating EEG spatial gradients as acoustic waveforms. 
 
-This repository contains a novel Brain-Computer Interface (BCI) pipeline that decodes Left/Right Hand Motor Imagery. Traditional BCI approaches rely on computationally heavy, "black-box" 2D Convolutional Neural Networks (like EEGNet).
-
-This project introduces a highly interpretable, ultra-lightweight alternative: **treating spatial EEG voltage gradients as acoustic waveforms**. By applying physics-informed spatial filters and extracting audio textures (MFCCs, Spectral Centroid, ZCR) via `librosa`, this pipeline achieves high-accuracy decoding using a simple XGBoost classifier.
-
-## Repository Structure & Iteration History
-
-The project evolved through five distinct iterations, fully contained within self-executing Jupyter Notebooks:
-
-### **Phase 1: Early Deep Learning & BCI Comp IV**
-
-* `notebooks/CompleteModelVersion1.ipynb` - Initial experiments using LSTMs and Autoencoders on the BCI Competition IV dataset.
-* `notebooks/V2-RF-LeakyRelu-SVMs(randomattempts).ipynb` - Transitioning away from pure deep learning to manual feature extraction.
-* `notebooks/V3-hybridCAE-RF.ipynb` - Establishing the first XGBoost baselines on standard EEG bands.
-
-### **Phase 2: The "Clean-Pipe" & GigaScience Scale-Up**
-
-* `notebooks/V4-UsingLibrosaCAE.ipynb.ipynb` - Shifting to the 64-channel Cho2017 GigaScience dataset. Introduction of the "Clean-Pipe" spatial filter and Global (Subject-Independent) modeling.
-* `notebooks/V5-LibrosaSpatialDifferenceXGBoost.ipynb` - **[FINAL PIPELINE]** Implementation of Dual-Band Acoustic Extraction, Temporal Micro-Slicing, and Subject-Specific validation to combat BCI Illiteracy and Inter-Subject Variability.
+In its latest iteration, the pipeline has evolved into the **RADAR Architecture (Resilient Architecture for Dynamic Affect Recognition)**. RADAR is a hardware-agnostic, dual-stream fusion pipeline designed for industrial edge-computing. It decodes complex human emotions and cognitive stress while actively combatting **Concept Drift** (hardware degradation and biological fatigue) over continuous real-world deployments.
 
 ---
 
-## The "Clean-Pipe" Architecture (Version 5)
+## Repository Evolution & Notebook Structure
 
-The final pipeline operates in three deterministic phases:
+The project has evolved through three distinct research phases, fully contained within self-executing Jupyter Notebooks.
 
-### 1. Spatial Preprocessing
+### Phase 1: Deep Learning & BCI Comp IV (Motor Imagery)
+* `notebooks/V1_CompleteModelVersion1.ipynb` - Initial LSTM/Autoencoder experiments.
+* `notebooks/V2_RF_LeakyRelu_SVMs.ipynb` - Transition to manual feature extraction.
+* `notebooks/V3_hybridCAE_RF.ipynb` - Establishing the first XGBoost baselines on standard EEG bands.
 
-* **Reaction-Time Shift:** Slices the signal from $0.5s - 2.5s$ to remove Visual Evoked Potentials (VEP) and capture pure internal motor intent.
-* **Common Average Reference (CAR):** Subtracts the global mean to cancel ambient scalp noise.
-* **Z-Score Normalization & Gating:** Normalizes individual trials and clamps outliers at $\pm3.0\sigma$ to eliminate blink artifacts.
-* **Symmetrical Bipolar Mapping:** Creates "Virtual Channels" by subtracting right hemisphere from left hemisphere (e.g., $C_3 - C_4$). This mathematically highlights the lateralization of the motor cortex.
+### Phase 2: The "Clean-Pipe" & GigaScience (Motor Imagery)
+* `notebooks/V4_UsingLibrosaCAE.ipynb` - Shift to 64-channel Cho2017 dataset. 
+* `notebooks/V5_LibrosaSpatialDifferenceXGBoost.ipynb` - Implementation of Dual-Band Acoustic Extraction (MFCCs, ZCR, Spectral Centroid) and Temporal Micro-Slicing. Proved Event-Related Desynchronization (ERD) mathematically using XGBoost feature importance.
 
-### 2. Dual-Band Acoustic Extraction
-
-Instead of passing raw signals to a model, the virtual channels are split into **Mu (8-12 Hz)** and **Beta (13-30 Hz)** bands using Butterworth filters. They are then processed as audio tracks using `librosa` to extract 1D textures:
-
-* RMS Volume (Signal power)
-* Zero Crossing Rate (ZCR)
-* Spectral Centroid (Pitch center)
-* Kurtosis (Signal impulsiveness)
-* Mel-Frequency Cepstral Coefficients (MFCC 1 & 2)
-
-### 3. Classification
-
-A hyper-tuned `XGBoost` model evaluates the resulting dense 1D feature matrix.
+### Phase 3: The RADAR Architecture [LATEST] (Affect & Emotion Recognition)
+* `notebooks/V6_RADAR_ConsumerEdge_DREAMER.ipynb` - Testing the pipeline on the 14-channel dry-electrode DREAMER dataset for binary stress classification.
+* `notebooks/V7_RADAR_ClinicalScale_SEED_IV.ipynb` - Scaling to the 62-channel wet-electrode SEED-IV dataset. Introduces Tri-Phasic Evaluation (Stratified, Chronological, and Global LOSO) to measure Concept Drift.
 
 ---
 
-## Results & Biological Proof
+## The RADAR Architecture (Version 7)
 
-### The Inter-Subject Variability Wall
+The latest emotion-recognition pipeline abandons computationally heavy, static deep learning in favor of a lightweight edge-computing philosophy.
 
-Initial tests on a 15-subject Global Model yielded an accuracy of ~53%. This accurately replicated the documented biological phenomenon of **Inter-Subject Variability** (differences in cortical folding and skull thickness destroying global decision boundaries).
+### 1. Hardware-Adaptive Filtration & MTI
+* **Dynamic Power Gating:** Automatically scaling impedance ceilings (800 µV² for dry headsets, 5000 µV² for wet rigs) to destroy macro-motion artifacts (e.g., violent jaw clenching).
+* **The Muscle Tension Indicator (MTI):** Instead of discarding all noise, the 35–50Hz high-gamma band is isolated. This captures subconscious facial micro-tension—a highly correlated physiological proxy for stress.
 
-### Subject-Specific Validation & "BCI Illiteracy"
+### 2. Acoustic & Spatial Feature Extraction
+Treating the brainwave as a raw acoustic waveform, the pipeline extracts audio textures via `librosa` (MFCCs, Zero Crossing Rate, RMS) alongside traditional Differential Entropy (DE) and spatial asymmetry metrics (DASM, RASM).
 
-Transitioning to within-subject models yielded a Grand Average of 55.38%. Consistent with clinical literature, roughly 70% of subjects exhibited "BCI Illiteracy," producing signals too chaotic for surface EEG decoding.
-
-### The "Golden Subject" Case Study (Subject 14)
-
-For subjects with high BCI literacy, the acoustic pipeline proved highly effective.
-Using **Temporal Micro-Slicing** (chopping the 2.0s window into three overlapping timeline chunks to capture thought dynamics), the pipeline achieved:
-
-* **True Average Accuracy:** 75.00%
-* **Peak Fold Accuracy:** 80.00%
-
-### Interpretability: Discovering Physics Blind
-
-Unlike deep learning models, this pipeline remains perfectly interpretable. A feature importance analysis of the XGBoost decision trees revealed that the single most important metric for prediction was:
-
-> `C3-C4 | Mu (8-12Hz) | RMS Volume`
-
-The algorithm mathematically proved that a drop in electrical "volume" over the primary motor cortex in the 8-12Hz band is the primary indicator of movement. In neuroscience, this is a known phenomenon called **Event-Related Desynchronization (ERD)**. The machine learning model discovered human biology entirely on its own.
+### 3. The 85/15 Dual-Stream Fusion Engine
+* **Stream A (Primary):** A hyper-tuned XGBoost model (85% weight) handles complex, non-linear classification boundaries.
+* **Stream B (Helper):** A 1D-Convolutional Autoencoder (15% weight) constrained by a severe **32-node bottleneck**. This strict compression acts as a spatial regularizer, preventing the model from memorizing temporal noise and acting as a "confidence sharpener."
 
 ---
 
-## Quick Start (Running Version 5)
+## Findings: The "Chronological Collapse"
 
-1. Clone the repository and install dependencies:
+Current BCI literature relies on randomized evaluation, which artificially inflates accuracy by peeking into the biological future. The RADAR pipeline was explicitly designed to expose the reality of industrial deployment across time using the 4-class SEED-IV dataset:
 
+1. **The Laboratory Ceiling (Stratified K-Fold): `91.28%`** * When data is randomized, neutralizing drift, the dual-stream architecture achieves near-perfect multi-class mapping.
+2. **The Temporal Drift (Chronological Split): `33.32%`**
+   * When trained on Session 1 and tested sequentially on Session 3, performance catastrophically collapses. This proves that **Concept Drift** (gel drying, cognitive fatigue) destroys static AI models over time.
+3. **The Out-of-the-Box Reality (Global LOSO): `41.49%`**
+   * Testing on completely unseen human subjects clears the 25% random-chance threshold, but proves that inter-subject variability (skull thickness, cortical folding) limits zero-shot deployment.
+
+**Conclusion:** Edge BCI cannot rely on static models. It requires continuous, *Recursive-Resilient* on-device weight updates to survive temporal drift.
+
+---
+
+## Quick Start
+
+Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/Rishab-Satpathy/EEGDataInferenceTools.git
-cd acoustic-bci
+git clone [https://github.com/Rishab-Satpathy/EEGDataInferenceTools.git](https://github.com/Rishab-Satpathy/EEGDataInferenceTools.git)
+cd EEGDataInferenceTools
 pip install -r requirements.txt
 
-```
-
-2. Open the final Jupyter Notebook:
-
-```bash
-jupyter notebook notebooks/Ver5_Subject_Specific_Acoustics.ipynb
-
-```
-
-*Note: The `moabb` library will automatically download the required GigaScience Cho2017 dataset upon first execution.*
-
-just for more extra testing data i have attached a google docs which has data stored on testing data from ver4 and ver5:
-https://docs.google.com/document/d/1pZDn4CRjMdqDynXtrMZNI5GClYld_5VN19rI39tpsGo/edit?usp=sharing
-
-model data for ver1 to ver3 hasn't been recorded as the success rate was hovering around 20-30 percent which suggested shallowness of data and model guessing was random and not heuristic 
+Note: Datasets (MOABB / SEED-IV) may require local downloading or API authentication depending on the selected notebook.
