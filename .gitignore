@@ -11,6 +11,12 @@
 mne_data/
 /processed_global/
 /TrainingTesting-Data/
+/DREAMER_FEATURES_EXTREME_CLASSES/
+/DREAMER_FEATURES/
+/DREAMER_FEATURES_EXTREME_CLASSES_2/
+/eeg_raw_data/
+/processed_data/
+/SEED_IV_FEATURES/
 
 # PYTHON ENVIRONMENTS
 
