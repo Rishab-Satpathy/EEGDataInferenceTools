@@ -83,7 +83,7 @@ The algorithm mathematically proved that a drop in electrical "volume" over the 
 1. Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/acoustic-bci.git
+git clone https://github.com/Rishab-Satpathy/EEGDataInferenceTools.git
 cd acoustic-bci
 pip install -r requirements.txt
 
